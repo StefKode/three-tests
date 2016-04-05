@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>My first Three.js app</title>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+	</head>
+	<body>
+		<script src="../js/three.min.js"></script>
+		<script src="../js/controls/TrackballControls.js"></script>
+		<script>
+            var particles, geometry, material, parameters, i, h, color, size;
+
+			var renderer = new THREE.WebGLRenderer();
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			document.body.appendChild(renderer.domElement);
+			var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
+			camera.position.set(0, 0, 100);
+			camera.lookAt(new THREE.Vector3(0, 0, 0));
+			controls = new THREE.TrackballControls(camera);
+			controls.rotateSpeed = 4.0;
+			controls.zoomSpeed = 0.2;
+			controls.panSpeed = 0.8;
+			controls.noZoom = false;
+			controls.noPan = false;
+			controls.staticMoving = false; 
+			controls.dynamicDampingFactor = 0.3;
+			controls.addEventListener( 'change', render);
+			var scene = new THREE.Scene();
+
+            //###############################################################################
+
+            geometry = new THREE.Geometry();
+
+            for ( i = 0; i < 20000; i ++ ) {
+                var vertex = new THREE.Vector3();
+                vertex.x = Math.random() * 20 - 10;
+                vertex.y = Math.random() * 20 - 10;
+                vertex.z = Math.random() * 20 - 10;
+                geometry.vertices.push( vertex );
+            }
+
+            material  = new THREE.PointsMaterial({ size: 0.1 });
+            particles = new THREE.Points(geometry, material);
+            scene.add( particles );
+
+            var box = new THREE.BoxHelper(particles);
+            scene.add(box);
+        
+            //###############################################################################
+			function animate() {
+				requestAnimationFrame( animate );
+				controls.update();
+			}
+			function render() {
+				renderer.render( scene, camera );
+			}
+			render();
+			animate();
+		</script>
+	</body>
+</html>
