@@ -40,27 +40,29 @@
 
             function genParticles(num) {
                 geometry = new THREE.Geometry();
+
                 for ( i = 0; i < num; i ++ ) {
                     var vertex = new THREE.Vector3();
-		    var az  = Math.random() * 2 * Math.PI;
-		    var dec = Math.random() * Math.PI;
-		    var len = Math.random() * 2000;
+                    var az  = Math.random() * 2 * Math.PI;
+                    var dec = Math.random() * Math.PI;
+                    var len = Math.random() * 2000;
                     vertex.x = len * Math.cos(az) * Math.sin(dec);
                     vertex.y = len * Math.sin(az) * Math.sin(dec);
                     vertex.z = len * Math.cos(dec);
                     geometry.vertices.push( vertex );
                 }
 
-                size     = Math.random() * 7;
-                material = new THREE.PointsMaterial({ size: size, map: sprite, blending: THREE.AdditiveBlending, depthTest: false, transparent : true });
+                size      = Math.random() * 7;
+                material  = new THREE.PointsMaterial({ size: size, map: sprite, blending: THREE.AdditiveBlending, depthTest: false, transparent : true });
                 particles = new THREE.Points(geometry, material);
                 scene.add(particles);
             }
 
-            var chunk = numparticles/100;
-            for (k = 0; k < 100; k++) {
-                genParticles(chunk);
-            }
+            //var chunk = numparticles/100;
+            //for (k = 0; k < 100; k++) {
+            //    genParticles(chunk);
+            //}
+            genParticles(numparticles);
 
             //var box = new THREE.BoxHelper(particles);
             ////scene.add(box);
