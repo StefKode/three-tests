@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>My first Three.js app</title>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+	</head>
+	<body>
+		<script src="../js/three.min.js"></script>
+		<script src="../js/controls/TrackballControls.js"></script>
+		<script>
+            var particles, geometry, material, parameters, i, h, color, size;
+
+			var renderer = new THREE.WebGLRenderer();
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			document.body.appendChild(renderer.domElement);
+            
+			var	camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 9000 );
+			camera.position.z = 2000;
+
+			camera.lookAt(new THREE.Vector3(0, 0, 0));
+			controls = new THREE.TrackballControls(camera);
+			controls.rotateSpeed = 4.0;
+			controls.zoomSpeed = 0.2;
+			controls.panSpeed = 0.8;
+			controls.noZoom = false;
+			controls.noPan = false;
+			controls.staticMoving = false; 
+			controls.dynamicDampingFactor = 0.3;
+			controls.addEventListener( 'change', render);
+			var scene = new THREE.Scene();
+
+            //###############################################################################
+
+            var numparticles = 100000;
+            sprite = new THREE.TextureLoader().load("star.png" );
+
+            function genParticles(num) {
+                geometry = new THREE.Geometry();
+                for ( i = 0; i < num; i ++ ) {
+                    var vertex = new THREE.Vector3();
+		    var az  = Math.random() * 2 * Math.PI;
+		    var dec = Math.random() * Math.PI;
+		    var len = Math.random() * 2000;
+                    vertex.x = len * Math.cos(az) * Math.sin(dec);
+                    vertex.y = len * Math.sin(az) * Math.sin(dec);
+                    vertex.z = len * Math.cos(dec);
+                    geometry.vertices.push( vertex );
+                }
+
+                size     = Math.random() * 7;
+                material = new THREE.PointsMaterial({ size: size, map: sprite, blending: THREE.AdditiveBlending, depthTest: false, transparent : true });
+                particles = new THREE.Points(geometry, material);
+                scene.add(particles);
+            }
+
+            var chunk = numparticles/100;
+            for (k = 0; k < 100; k++) {
+                genParticles(chunk);
+            }
+
+            //var box = new THREE.BoxHelper(particles);
+            ////scene.add(box);
+        
+            //###############################################################################
+			function animate() {
+				requestAnimationFrame( animate );
+                camera.position.z -= 0.3;
+				controls.update();
+			}
+			function render() {
+				renderer.render( scene, camera );
+			}
+			render();
+			animate();
+		</script>
+	</body>
+</html>
