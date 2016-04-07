@@ -20,8 +20,8 @@
             
 			var	camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 9000 );
 			camera.position.z = 2000;
-
 			camera.lookAt(new THREE.Vector3(0, 0, 0));
+
 			controls = new THREE.TrackballControls(camera);
 			controls.rotateSpeed = 4.0;
 			controls.zoomSpeed = 0.2;
@@ -31,70 +31,96 @@
 			controls.staticMoving = false; 
 			controls.dynamicDampingFactor = 0.3;
 			controls.addEventListener( 'change', render);
+
 			var scene = new THREE.Scene();
 
             //###############################################################################
-
             sprite = new THREE.TextureLoader().load("star.png" );
 
-            function averageOfRandom(count) {
-                return function () {
-                    var total = 0.0;
-                    for (var i = 0; i < count; ++i) {
-                        total += Math.random();
+            //particle counter
+            var numParticles = 0;
+
+            //max dist normal
+            var maxNorm = 174;
+
+            //this is the histogram array
+            var hist = [];
+
+            //this is the probability envelope
+            var probEnv = [];
+
+            //setup the probabiliy envelope and historam
+            function setupProbEnv() {
+                for (var i = 0; i < maxNorm; i++) {
+                    probEnv[maxNorm - i - 1] = i / (85 * maxNorm);
+                    hist[i]    = 0;
+                }
+            }
+
+            //function for non-uniformly distribued random numbers
+            //based on sorting along a probability envelope
+            //returns range -1...1
+            function nurd3d() {
+                numParticles += 1;
+                var x=0, y=0, z=0;
+                var xyz = {};
+
+                //search a point within distribution
+                while (1) {
+                    x = Math.random() * 2 - 1;
+                    y = Math.random() * 2 - 1;
+                    z = Math.random() * 2 - 1;
+                    var dist   = Math.sqrt(x*x + y*y + z*z);
+                    var bucket = Math.floor(dist * 100);
+
+                    if (bucket > maxNorm) {
+                        bucket = maxNorm;
                     }
-                    return total / count;
+
+                    var curprob = hist[bucket] / numParticles;
+                    if (curprob > probEnv[bucket]) {
+                        continue;
+                    }
+                    hist[bucket] += 1;
+                    break;
                 }
+                xyz['x'] = x;
+                xyz['y'] = y;
+                xyz['z'] = z;
+                return xyz;
             }
 
-            function myran(count) {
-                var total = 0.0;
-                //count = 50;
-                for (var i = 0; i < count; ++i) {
-                    total += Math.random();
-                }
-                return total / count;
-            }
-
-			function nurg() {
-				unif = Math.random();
-				beta = Math.pow(Math.sin(unif * Math.PI / 2), 2);
-            return beta;
-				if (beta > 0.4) {
-					return 2*beta-1;
-				}
-				return 2*(1-beta)-1;
-			}
-
-            function genParticles(num, cycles) {
+            function genParticles(num) {
                 geometry = new THREE.Geometry();
+
                 for (var i = 0;i < num;i++ ) {
                     var vertex = new THREE.Vector3();
-                    vertex.x = nurg() * 4000 - 2000;
-                    vertex.y = 0;
-                    vertex.z = 0;
+                    var xyz = nurd3d();
+
+                    vertex.x = xyz['x'] * 2000;
+                    vertex.y = xyz['y'] * 2000;
+                    vertex.z = xyz['z'] * 2000;
                     geometry.vertices.push(vertex);
                 }
 
                 size      = Math.random() * 7;
+                size      = 10;
                 material  = new THREE.PointsMaterial({ size: size, map: sprite, blending: THREE.AdditiveBlending, depthTest: false, transparent : true });
                 particles = new THREE.Points(geometry, material);
                 scene.add(particles);
             }
 
-            function makeParticles(num, rounds, cycles) {
+            function makeParticles(num, rounds) {
                 var chunk = num/rounds;
+
                 for (var k = 0; k < rounds; k++) {
-                    genParticles(chunk, cycles);
+                    genParticles(chunk);
                 }
             }
 
-//            makeParticles(10000, 100, 50);
-            makeParticles(1000, 1, 1);
+            setupProbEnv();
+            makeParticles(100000, 1);
 
-            //var box = new THREE.BoxHelper(particles);
-            ////scene.add(box);
-        
             //###############################################################################
 			function animate() {
 				requestAnimationFrame( animate );
