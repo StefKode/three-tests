@@ -35,22 +35,45 @@
 
             //###############################################################################
 
-            var numparticles = 100000;
             sprite = new THREE.TextureLoader().load("star.png" );
 
-            function genParticles(num) {
-                geometry = new THREE.Geometry();
+            function averageOfRandom(count) {
+                return function () {
+                    var total = 0.0;
+                    for (var i = 0; i < count; ++i) {
+                        total += Math.random();
+                    }
+                    return total / count;
+                }
+            }
 
-                for ( i = 0; i < num; i ++ ) {
+            function myran(count) {
+                var total = 0.0;
+                //count = 50;
+                for (var i = 0; i < count; ++i) {
+                    total += Math.random();
+                }
+                return total / count;
+            }
+
+			function nurg() {
+				unif = Math.random();
+				beta = Math.pow(Math.sin(unif * Math.PI / 2), 2);
+            return beta;
+				if (beta > 0.4) {
+					return 2*beta-1;
+				}
+				return 2*(1-beta)-1;
+			}
+
+            function genParticles(num, cycles) {
+                geometry = new THREE.Geometry();
+                for (var i = 0;i < num;i++ ) {
                     var vertex = new THREE.Vector3();
-                    var az  = Math.random() * 2 * Math.PI;
-                    //var dec = Math.random() * Math.PI;
-                    var dec = Math.PI/3;
-                    var len = Math.random() * 2000;
-                    vertex.x = len * Math.cos(az) * Math.sin(dec);
-                    vertex.z = len * Math.sin(az) * Math.sin(dec);
-                    vertex.y = len * Math.cos(dec);
-                    geometry.vertices.push( vertex );
+                    vertex.x = nurg() * 4000 - 2000;
+                    vertex.y = 0;
+                    vertex.z = 0;
+                    geometry.vertices.push(vertex);
                 }
 
                 size      = Math.random() * 7;
@@ -59,11 +82,15 @@
                 scene.add(particles);
             }
 
-            //var chunk = numparticles/100;
-            //for (k = 0; k < 100; k++) {
-            //    genParticles(chunk);
-            //}
-            genParticles(numparticles);
+            function makeParticles(num, rounds, cycles) {
+                var chunk = num/rounds;
+                for (var k = 0; k < rounds; k++) {
+                    genParticles(chunk, cycles);
+                }
+            }
+
+//            makeParticles(10000, 100, 50);
+            makeParticles(1000, 1, 1);
 
             //var box = new THREE.BoxHelper(particles);
             ////scene.add(box);
