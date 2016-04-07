@@ -103,8 +103,8 @@
                     geometry.vertices.push(vertex);
                 }
 
-                size      = Math.random() * 7;
-                size      = 10;
+                size      = Math.random() * 10;
+                //size      = 10;
                 material  = new THREE.PointsMaterial({ size: size, map: sprite, blending: THREE.AdditiveBlending, depthTest: false, transparent : true });
                 particles = new THREE.Points(geometry, material);
                 scene.add(particles);
@@ -119,7 +119,7 @@
             }
 
             setupProbEnv();
-            makeParticles(100000, 1);
+            makeParticles(100000, 10);
 
             //###############################################################################
 			function animate() {
