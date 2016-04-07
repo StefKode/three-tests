@@ -52,7 +52,7 @@
             //setup the probabiliy envelope and historam
             function setupProbEnv() {
                 for (var i = 0; i < maxNorm; i++) {
-                    probEnv[maxNorm - i - 1] = i / (85 * maxNorm);
+                    probEnv[i] = 1 - (i / maxNorm);
                     hist[i]    = 0;
                 }
             }
@@ -77,7 +77,7 @@
                         bucket = maxNorm;
                     }
 
-                    var curprob = hist[bucket] / numParticles;
+                    var curprob = 85 * hist[bucket] / numParticles;
                     if (curprob > probEnv[bucket]) {
                         continue;
                     }
