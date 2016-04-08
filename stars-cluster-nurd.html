@@ -33,6 +33,7 @@
         var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 9000);
         camera.position.z = 2000;
         camera.lookAt(new THREE.Vector3(0, 0, 0));
+        var camAngle = 0.0;
 
         //you can control the camera position (not orientation) by mouse
         controls = new THREE.TrackballControls(camera);
@@ -181,7 +182,7 @@
 
         setupProbEnv();
         // this is the star cluster (uses nurd)
-        makeParticles(10000, 1, 1);
+        makeParticles(10000, 100, 1);
 
         // this is the surrounding space (uses urd)
         makeParticles(1000, 100, 0);
@@ -191,7 +192,13 @@
             requestAnimationFrame(animate);
 
             //give the camera a small movement towards z-axis
-            camera.position.z -= 0.1;
+            //camera.position.z -= 0.1;
+            camAngle -= 0.001;
+            if (camAngle == -2*Math.PI) {
+                   camAngle = 0;
+            }
+            camera.position.x = Math.cos(camAngle) * 1.5 * maxSpaceSize;
+            camera.position.z = Math.sin(camAngle) * 1.5 * maxSpaceSize;
             controls.update();
         }
 
