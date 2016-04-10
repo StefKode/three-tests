@@ -25,18 +25,20 @@
         //https://github.com/StefanKochGit/three-tests.git
         //
         var particles, geometry, material, parameters, i, h, color, size;
-
         var renderer = new THREE.WebGLRenderer();
+
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
         var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 9000);
         camera.position.z = 2000;
-        var camTarget = new THREE.Vector3(0, 0, 0);
-        camera.lookAt(camTarget);
+        var camTarget = new THREE.Vector3(0, 0, -1);
+        camera.lookAt(camera.position + camTarget);
+        camera.eulerOrder = 'ZXY';
 
-        //you can control the camera position (not orientation) by joystick
+        //you can control the camera position (not orientation) by mouse
         controls = new THREE.GamepadControls(camera);
+
         var scene = new THREE.Scene();
 
         //###############################################################################
@@ -179,15 +181,31 @@
         makeParticles(1000, 100, 1, center2, 0.4);
 
         // this is the surrounding space (uses urd)
-        maxSpaceSize = 9000;
         makeParticles(1000, 100, 0, center1, 1.0);
 
         //###############################################################################
         function animate() {
             requestAnimationFrame(animate);
-            camera.lookAt(camTarget);
-            camera.position.y += controls.jpitch;
-            camera.position.x += controls.jroll;
+            camTarget.applyAxisAngle(
+                new THREE.Vector3(1,0,0),
+                controls.jpitch / 80);
+
+            camTarget.applyAxisAngle(
+                new THREE.Vector3(0,1,0),
+                controls.jroll / -80);
+
+            var len = 100 * controls.jmove;
+            if (len > 1) {
+                len = 1;
+            }
+            if (len < 1) {
+                len = 0;
+            }
+            camTarget.setLength(len);
+            camera.position.add(camTarget);
+            camera.lookAt(new THREE.Vector3(camera.position.x + camTarget.x,
+                                            camera.position.y + camTarget.y,
+                                            camera.position.z + camTarget.z));
             render();
         }
 
@@ -198,5 +216,4 @@
         animate();
     </script>
 </body>
-
 </html>
