@@ -18,7 +18,7 @@
 
 <body>
     <script src="../js/three.min.js"></script>
-    <script src="../three-gamepad/THREE.GamepadControls.js"></script>
+    <script src="GamepadControls.js"></script>
     <script>
         //
         //Stefan Koch, 2016
@@ -26,20 +26,59 @@
         //
         var particles, geometry, material, parameters, i, h, color, size;
         var renderer = new THREE.WebGLRenderer();
-
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.autoClear = false;
         document.body.appendChild(renderer.domElement);
 
-        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 9000);
+        var camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 9000);
         camera.position.z = 2000;
         var camTarget = new THREE.Vector3(0, 0, -1);
         camera.lookAt(camera.position + camTarget);
         camera.eulerOrder = 'ZXY';
-
         //you can control the camera position (not orientation) by mouse
         controls = new THREE.GamepadControls(camera);
-
         var scene = new THREE.Scene();
+
+
+        // Ok, now we have the cube. Next we'll create the hud. For that we'll
+        // need a separate scene which we'll render on top of our 3D scene. We'll
+        // use a dynamic texture to render the HUD.
+
+        // Create shortcuts for window size.
+        var width = window.innerWidth;
+        var height = window.innerHeight;
+
+        // We will use 2D canvas element to render our HUD.  
+        var hudCanvas = document.createElement('canvas');
+
+        // Again, set dimensions to fit the screen.
+        hudCanvas.width = width;
+        hudCanvas.height = height;
+
+        // Get 2D context and draw something supercool.
+        var hudBitmap = hudCanvas.getContext('2d');
+        hudBitmap.font = "Normal 40px Arial";
+        hudBitmap.textAlign = 'center';
+        hudBitmap.fillStyle = "rgba(245,245,245,0.75)";
+
+        // Create the camera and set the viewport to match the screen dimensions.
+        var cameraHUD = new THREE.OrthographicCamera(-width/2, width/2, height/2, -height/2, 0, 30 );
+
+        // Create also a custom scene for HUD.
+        sceneHUD = new THREE.Scene();
+
+        // Create texture from rendered graphics.
+        var hudTexture = new THREE.Texture(hudCanvas) 
+        hudTexture.needsUpdate = true;
+
+        // Create HUD material.
+        var material = new THREE.MeshBasicMaterial( {map: hudTexture} );
+        material.transparent = true;
+
+        // Create plane to render the HUD. This plane fill the whole screen.
+        var planeGeometry = new THREE.PlaneGeometry( width, height );
+        var plane = new THREE.Mesh( planeGeometry, material );
+        sceneHUD.add( plane );
 
         //###############################################################################
         sprite = new THREE.TextureLoader().load("star.png");
@@ -183,36 +222,43 @@
         // this is the surrounding space (uses urd)
         makeParticles(1000, 100, 0, center1, 1.0);
 
+        var txUpdate = 0;
+        var len      = 0;
+        var camTmp   = new THREE.Vector3();
+        var targTmp  = new THREE.Vector3();
+
         //###############################################################################
         function animate() {
             requestAnimationFrame(animate);
-            camTarget.applyAxisAngle(
-                new THREE.Vector3(1,0,0),
-                controls.jpitch / 80);
 
-            camTarget.applyAxisAngle(
-                new THREE.Vector3(0,1,0),
-                controls.jroll / -80);
+            len += -0.001 * controls.jmove;
+            txUpdate +=1;
+            if (txUpdate >= 20) {
+                txUpdate = 0;
+                hudBitmap.clearRect(0, 0, width, height);
+                hudBitmap.fillText(-1 * controls.jmove, width / 2, height / 2);
+                hudTexture.needsUpdate = true;
+            }
 
-            var len = 100 * controls.jmove;
-            if (len > 1) {
-                len = 1;
+            camTarget.applyAxisAngle(new THREE.Vector3(1,0,0), controls.jpitch /  80);
+            camTarget.applyAxisAngle(new THREE.Vector3(0,1,0), controls.jroll  / -80);
+
+            targTmp.copy(camTarget);
+            if (len < 0) {
+                targTmp.negate();
             }
-            if (len < 1) {
-                len = 0;
-            }
-            camTarget.setLength(len);
-            camera.position.add(camTarget);
-            camera.lookAt(new THREE.Vector3(camera.position.x + camTarget.x,
-                                            camera.position.y + camTarget.y,
-                                            camera.position.z + camTarget.z));
+            targTmp.setLength(Math.abs(len));
+
+            camera.position.add(targTmp);
+            camTmp.addVectors(camera.position, camTarget);
+            camera.lookAt(camTmp);
             render();
         }
 
         function render() {
             renderer.render(scene, camera);
+            renderer.render(sceneHUD, cameraHUD);
         }
-        render();
         animate();
     </script>
 </body>
