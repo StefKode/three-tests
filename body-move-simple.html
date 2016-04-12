@@ -24,18 +24,15 @@
         //Stefan Koch, 2016
         //https://github.com/StefanKochGit/three-tests.git
         //
-        var particles, geometry, material, parameters, i, h, color, size;
-
         var renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
         var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 9000);
-        camera.position.z = 2000;
+        camera.position.z = 600;
+        camera.position.x = -100;
         camera.lookAt(new THREE.Vector3(0, 0, 0));
-        var camAngle = 0.0;
 
-        //you can control the camera position (not orientation) by mouse
         controls = new THREE.TrackballControls(camera);
         controls.rotateSpeed = 4.0;
         controls.zoomSpeed = 0.2;
@@ -49,154 +46,74 @@
         var scene = new THREE.Scene();
 
         //###############################################################################
-        sprite = new THREE.TextureLoader().load("star.png");
 
-        //this is the edge length of the cube forming space
-        var maxSpaceSize = 2000;
+	//cube = new THREE.Mesh( new THREE.CubeGeometry( 200, 200, 200 ), new THREE.MeshNormalMaterial() );
+	//cube.position.x = 0;
+	//cube.position.y = 0;
+	//cube.position.z = 0;
+	//scene.add(cube);
 
-        //particle counter
-        var numParticles = 0;
+	var arrow1 = new THREE.Group();
+	var origin1 = new THREE.Vector3( 0, 0, 0 );
+	var dir1X = new THREE.Vector3(   1, 0, 0 );
+	var dir1Y = new THREE.Vector3(   0, 1, 0 );
+	var dir1Z = new THREE.Vector3(   0, 0, 1 );
+	dir1Z.add(origin1);
+	dir1Y.add(origin1);
+	dir1X.add(origin1);
+	var length1 = 200;
+	var arrowHelper1X = new THREE.ArrowHelper( dir1X, origin1, length1, 0xff0000 );
+	var arrowHelper1Y = new THREE.ArrowHelper( dir1Y, origin1, length1, 0x00ff00 );
+	var arrowHelper1Z = new THREE.ArrowHelper( dir1Z, origin1, length1, 0x0000ff );
+	arrow1.add(arrowHelper1X);
+	arrow1.add(arrowHelper1Y);
+	arrow1.add(arrowHelper1Z);
+	scene.add(arrow1);
 
-        //max dist normal
-        var maxNormResolution = 100;
-        var maxNorm = Math.floor(Math.sqrt(3) * maxNormResolution);
-
-        //this is the histogram array
-        var hist = [];
-
-        //this is the probability envelope
-        var probEnv = [];
-
-        //setup the probabiliy envelope and historam
-        function setupProbEnv() {
-            for (var i = 0; i < maxNorm; i++) {
-                probEnv[i] = 0.0;
-                hist[i] = 0.0;
-            }
-            //we use some quadratic function: f(x) = 1 / ((x*x/5)+1)
-            for (var i = 0; i < 100; i++) {
-                probEnv[i] = 1 / ((i * i / 5) + 1);
-            }
-        }
-
-        //function for non-uniformly distribued random numbers
-        //based on sorting along a probability envelope
-        //returns range -1...1
-        function nurd3d() {
-            numParticles += 1;
-            var x = 0;
-            var y = 0;
-            var z = 0;
-            var xyz = {};
-
-            //search a point within distribution
-            while (1) {
-                //get candidate position
-                x = Math.random() * 2 - 1;
-                y = Math.random() * 2 - 1;
-                z = Math.random() * 2 - 1;
-
-                //map to histogram
-                var dist = Math.sqrt((x * x) + (y * y) + (z * z));
-                var bucket = Math.floor(dist * maxNormResolution);
-
-                //in case of an error - dont blow up
-                if (bucket > maxNorm) {
-                    bucket = maxNorm;
-                }
-
-                //probe if the added position would leave the target
-                //probability distribution for this specific distance
-                //to the origin, if result is negative then try again
-                var curprob = (hist[bucket] + 1) / numParticles;
-                if (curprob > probEnv[bucket]) {
-                    continue;
-                }
-                //position is within the target envelope
-                hist[bucket] += 1;
-                break;
-            }
-            xyz['x'] = x;
-            xyz['y'] = y;
-            xyz['z'] = z;
-            return xyz;
-        }
-
-        //function for uniformly distribued random numbers
-        //returns range -1...1
-        function urd3d() {
-            var xyz = {};
-
-            //this is a simple uniform random distribution
-            var x = Math.random() * 2 - 1;
-            var y = Math.random() * 2 - 1;
-            var z = Math.random() * 2 - 1;
-
-            xyz['x'] = x;
-            xyz['y'] = y;
-            xyz['z'] = z;
-            return xyz;
-        }
-
-        //generates the particle system
-        //mode = 0 --> simple uniform distribution
-        //mode = 1 --> use probEnv distribution envelope
-        function genParticles(num, mode) {
-            geometry = new THREE.Geometry();
-
-            for (var i = 0; i < num; i++) {
-                var vertex = new THREE.Vector3();
-                if (mode == 1) {
-                    var xyz = nurd3d();
-                } else {
-                    var xyz = urd3d();
-                }
-
-                vertex.x = xyz['x'] * maxSpaceSize;
-                vertex.y = xyz['y'] * maxSpaceSize;
-                vertex.z = xyz['z'] * maxSpaceSize;
-                geometry.vertices.push(vertex);
-            }
-
-            //for this run we pick a random size
-            size = Math.random() * 20;
-            material = new THREE.PointsMaterial({
-                size: size,
-                map: sprite,
-                blending: THREE.AdditiveBlending,
-                depthTest: false,
-                transparent: true
-            });
-            particles = new THREE.Points(geometry, material);
-            scene.add(particles);
-        }
-
-        //particle generation in chunks to allow different sizes to be generated
-        function makeParticles(num, rounds, mode) {
-            var chunk = num / rounds;
-
-            for (var k = 0; k < rounds; k++) {
-                genParticles(chunk, mode);
-            }
-        }
-
-        setupProbEnv();
-        // this is the star cluster (uses nurd)
-        makeParticles(10000, 100, 1);
-
-        // this is the surrounding space (uses urd)
-        makeParticles(1000, 100, 0);
+	var arrow2 = new THREE.Group();
+	var origin2 = new THREE.Vector3( 0, 0, 0);
+	var dir2X = new THREE.Vector3(   1, 0, 0 );
+	var dir2Y = new THREE.Vector3(   0, 1, 0 );
+	var dir2Z = new THREE.Vector3(   0, 0, 1 );
+	var length2 = 200;
+	var arrowHelper2X = new THREE.ArrowHelper( dir2X, origin2, length2, 0xff0000 );
+	var arrowHelper2Y = new THREE.ArrowHelper( dir2Y, origin2, length2, 0x00ff00 );
+	var arrowHelper2Z = new THREE.ArrowHelper( dir2Z, origin2, length2, 0x0000ff );
+	arrow2.add(arrowHelper2X);
+	arrow2.add(arrowHelper2Y);
+	arrow2.add(arrowHelper2Z);
+	arrow2.position.x = 100;
+	arrow2.position.y = 100;
+	arrow2.position.z = -100;
+	scene.add(arrow2);
 
         //###############################################################################
+	var c1 = 200;
+	var c2 = 200;
+	var c3 = 200;
         function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
+            	requestAnimationFrame(animate);
+		if (c1 > 0) {
+			arrow2.rotateY(0.01);
+			c1--;
+		} else {
+			if (c2 > 0) {
+				arrow2.rotateX(0.01);
+				c2--;
+			} else {
+				if (c3 > 0) {
+					arrow2.rotateY(0.01);
+					c3--;
+				} 
+			}
+		}
+		controls.update();
+		render();
         }
 
         function render() {
             renderer.render(scene, camera);
         }
-        render();
         animate();
     </script>
 </body>
