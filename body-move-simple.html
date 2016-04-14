@@ -19,6 +19,7 @@
 <body>
     <script src="../js/three.min.js"></script>
     <script src="../js/controls/TrackballControls.js"></script>
+    <script src="THREEx.KeyboardState.js"></script>
     <script>
         //
         //Stefan Koch, 2016
@@ -33,82 +34,100 @@
         camera.position.x = -100;
         camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-        controls = new THREE.TrackballControls(camera);
-        controls.rotateSpeed = 4.0;
-        controls.zoomSpeed = 0.2;
-        controls.panSpeed = 0.8;
-        controls.noZoom = false;
-        controls.noPan = false;
-        controls.staticMoving = false;
-        controls.dynamicDampingFactor = 0.3;
-        controls.addEventListener('change', render);
+		var keyboard = new THREEx.KeyboardState();
+
+//        controls = new THREE.TrackballControls(camera);
+//        controls.rotateSpeed = 4.0;
+//        controls.zoomSpeed = 0.2;
+//        controls.panSpeed = 0.8;
+//        controls.noZoom = false;
+//        controls.noPan = false;
+//        controls.staticMoving = false;
+//        controls.dynamicDampingFactor = 0.3;
+//        controls.addEventListener('change', render);
 
         var scene = new THREE.Scene();
 
         //###############################################################################
 
-	//cube = new THREE.Mesh( new THREE.CubeGeometry( 200, 200, 200 ), new THREE.MeshNormalMaterial() );
-	//cube.position.x = 0;
-	//cube.position.y = 0;
-	//cube.position.z = 0;
-	//scene.add(cube);
+        //cube = new THREE.Mesh( new THREE.CubeGeometry( 200, 200, 200 ), new THREE.MeshNormalMaterial() );
+        //cube.position.x = 0;
+        //cube.position.y = 0;
+        //cube.position.z = 0;
+        //scene.add(cube);
 
-	var arrow1 = new THREE.Group();
-	var origin1 = new THREE.Vector3( 0, 0, 0 );
-	var dir1X = new THREE.Vector3(   1, 0, 0 );
-	var dir1Y = new THREE.Vector3(   0, 1, 0 );
-	var dir1Z = new THREE.Vector3(   0, 0, 1 );
-	dir1Z.add(origin1);
-	dir1Y.add(origin1);
-	dir1X.add(origin1);
-	var length1 = 200;
-	var arrowHelper1X = new THREE.ArrowHelper( dir1X, origin1, length1, 0xff0000 );
-	var arrowHelper1Y = new THREE.ArrowHelper( dir1Y, origin1, length1, 0x00ff00 );
-	var arrowHelper1Z = new THREE.ArrowHelper( dir1Z, origin1, length1, 0x0000ff );
-	arrow1.add(arrowHelper1X);
-	arrow1.add(arrowHelper1Y);
-	arrow1.add(arrowHelper1Z);
-	scene.add(arrow1);
+        var arrow1 = new THREE.Group();
+        var origin1 = new THREE.Vector3( 0, 0, 0 );
+        var dir1X = new THREE.Vector3(   1, 0, 0 );
+        var dir1Y = new THREE.Vector3(   0, 1, 0 );
+        var dir1Z = new THREE.Vector3(   0, 0, 1 );
+        dir1Z.add(origin1);
+        dir1Y.add(origin1);
+        dir1X.add(origin1);
+        var length1 = 200;
+        var arrowHelper1X = new THREE.ArrowHelper( dir1X, origin1, length1, 0xff0000 );
+        var arrowHelper1Y = new THREE.ArrowHelper( dir1Y, origin1, length1, 0x00ff00 );
+        var arrowHelper1Z = new THREE.ArrowHelper( dir1Z, origin1, length1, 0x0000ff );
+        arrow1.add(arrowHelper1X);
+        arrow1.add(arrowHelper1Y);
+        arrow1.add(arrowHelper1Z);
+        scene.add(arrow1);
 
-	var arrow2 = new THREE.Group();
-	var origin2 = new THREE.Vector3( 0, 0, 0);
-	var dir2X = new THREE.Vector3(   1, 0, 0 );
-	var dir2Y = new THREE.Vector3(   0, 1, 0 );
-	var dir2Z = new THREE.Vector3(   0, 0, 1 );
-	var length2 = 200;
-	var arrowHelper2X = new THREE.ArrowHelper( dir2X, origin2, length2, 0xff0000 );
-	var arrowHelper2Y = new THREE.ArrowHelper( dir2Y, origin2, length2, 0x00ff00 );
-	var arrowHelper2Z = new THREE.ArrowHelper( dir2Z, origin2, length2, 0x0000ff );
-	arrow2.add(arrowHelper2X);
-	arrow2.add(arrowHelper2Y);
-	arrow2.add(arrowHelper2Z);
-	arrow2.position.x = 100;
-	arrow2.position.y = 100;
-	arrow2.position.z = -100;
-	scene.add(arrow2);
+        var arrow2 = new THREE.Group();
+        var origin2 = new THREE.Vector3( 0, 0, 0);
+        var dir2X = new THREE.Vector3(   1, 0, 0 );
+        var dir2Y = new THREE.Vector3(   0, 1, 0 );
+        var dir2Z = new THREE.Vector3(   0, 0, 1 );
+        var length2 = 200;
+        var arrowHelper2X = new THREE.ArrowHelper( dir2X, origin2, length2, 0xff0000 );
+        var arrowHelper2Y = new THREE.ArrowHelper( dir2Y, origin2, length2, 0x00ff00 );
+        var arrowHelper2Z = new THREE.ArrowHelper( dir2Z, origin2, length2, 0x0000ff );
+        arrow2.add(arrowHelper2X);
+        arrow2.add(arrowHelper2Y);
+        arrow2.add(arrowHelper2Z);
+        arrow2.position.x = 100;
+        arrow2.position.y = 100;
+        arrow2.position.z = -100;
+        scene.add(arrow2);
 
         //###############################################################################
-	var c1 = 200;
-	var c2 = 200;
-	var c3 = 200;
+  		var len = 0;
+		var lr  = 0;
+		var ud  = 0;
+
+        arrow1.add(camera);
+
         function animate() {
-            	requestAnimationFrame(animate);
-		if (c1 > 0) {
-			arrow2.rotateY(0.01);
-			c1--;
-		} else {
-			if (c2 > 0) {
-				arrow2.rotateX(0.01);
-				c2--;
-			} else {
-				if (c3 > 0) {
-					arrow2.rotateY(0.01);
-					c3--;
-				} 
+            requestAnimationFrame(animate);
+			if (keyboard.pressed("pageup")) {
+            	len += 0.01;
 			}
-		}
-		controls.update();
-		render();
+
+			if (keyboard.pressed("pagedown")) {
+            	len -= 0.01;
+			}
+
+			if (keyboard.pressed("up")) {
+				ud += 0.0001;
+			}
+
+			if (keyboard.pressed("down")) {
+				ud -= 0.0001;
+			}
+
+			if (keyboard.pressed("right")) {
+				lr += 0.0001;
+			}
+
+			if (keyboard.pressed("left")) {
+				lr -= 0.0001;
+			}
+            arrow1.rotateX(ud);
+            arrow1.rotateY(lr);
+            arrow1.translateZ(len);
+
+//		    controls.update();
+            render();
         }
 
         function render() {

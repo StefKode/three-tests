@@ -232,16 +232,16 @@
             requestAnimationFrame(animate);
 
             len += -0.001 * controls.jmove;
-            txUpdate +=1;
-            if (txUpdate >= 20) {
-                txUpdate = 0;
-                hudBitmap.clearRect(0, 0, width, height);
-                hudBitmap.fillText(-1 * controls.jmove, width / 2, height / 2);
-                hudTexture.needsUpdate = true;
-            }
+            //txUpdate +=1;
+            //if (txUpdate >= 20) {
+            //    txUpdate = 0;
+            //    hudBitmap.clearRect(0, 0, width, height);
+            //    hudBitmap.fillText(-1 * controls.jmove, width / 2, height / 2);
+            //    hudTexture.needsUpdate = true;
+            //}
 
-            camTarget.applyAxisAngle(new THREE.Vector3(1,0,0), controls.jpitch /  80);
-            camTarget.applyAxisAngle(new THREE.Vector3(0,1,0), controls.jroll  / -80);
+            var a = new THREE.Euler(controls.jpitch / 80, controls.jroll  / -80, 0, 'YXZ');
+            camTarget.applyEuler(a);
 
             targTmp.copy(camTarget);
             if (len < 0) {

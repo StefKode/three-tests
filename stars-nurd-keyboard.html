@@ -19,6 +19,7 @@
 <body>
     <script src="../js/three.min.js"></script>
     <script src="THREEx.KeyboardState.js"></script>
+    <script src="GamepadControls.js"></script>
     <script>
         //
         //Stefan Koch, 2016
@@ -30,14 +31,30 @@
         document.body.appendChild(renderer.domElement);
 
         var camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 9000);
-		camera.position.z = -2000;
-        camTarget = new THREE.Vector3(0, 0, -1);
-        camera.lookAt(camera.position + camTarget);
+		//camera.position.z = -2000;
         var scene = new THREE.Scene();
 		var keyboard = new THREEx.KeyboardState();
+        controls = new THREE.GamepadControls(camera);
 
         //###############################################################################
         sprite = new THREE.TextureLoader().load("star.png");
+
+        var arrow1 = new THREE.Group();
+        var origin1 = new THREE.Vector3( 0, 0, 0 );
+        var dir1X = new THREE.Vector3(   1, 0, 0 );
+        var dir1Y = new THREE.Vector3(   0, 1, 0 );
+        var dir1Z = new THREE.Vector3(   0, 0, 1 );
+        dir1Z.add(origin1);
+        dir1Y.add(origin1);
+        dir1X.add(origin1);
+        var length1 = 200;
+        var arrowHelper1X = new THREE.ArrowHelper( dir1X, origin1, length1, 0xff0000 );
+        var arrowHelper1Y = new THREE.ArrowHelper( dir1Y, origin1, length1, 0x00ff00 );
+        var arrowHelper1Z = new THREE.ArrowHelper( dir1Z, origin1, length1, 0x0000ff );
+        arrow1.add(arrowHelper1X);
+        arrow1.add(arrowHelper1Y);
+        arrow1.add(arrowHelper1Z);
+        scene.add(arrow1);
 
         //this is the edge length of the cube forming space
         var maxSpaceSize = 2000;
@@ -185,50 +202,47 @@
 		var ud  = 0;
 
         //###############################################################################
+  		var len = 0;
+		var lr  = 0;
+		var ud  = 0;
+
+        arrow1.add(camera);
+        arrow1.translateZ(2000);
+
         function animate() {
             requestAnimationFrame(animate);
 
-			if (keyboard.pressed("pageup")) {
-            	len += 0.01;
-			}
+//			if (keyboard.pressed("pageup")) {
+//            	len += 0.01;
+//			}
+//
+//			if (keyboard.pressed("pagedown")) {
+//            	len -= 0.01;
+//			}
+//
+//			if (keyboard.pressed("up")) {
+//				ud += 0.0001;
+//			}
+//
+//			if (keyboard.pressed("down")) {
+//				ud -= 0.0001;
+//			}
+//
+//			if (keyboard.pressed("right")) {
+//				lr += 0.0001;
+//			}
+//
+//			if (keyboard.pressed("left")) {
+//				lr -= 0.0001;
+//			}
+            len +=  0.0005 * controls.jmove;
+            lr  += -0.00008 * controls.jroll;
+            ud  +=  0.00008 * controls.jpitch;
 
-			if (keyboard.pressed("pagedown")) {
-            	len -= 0.0001;
-			}
+            arrow1.rotateX(ud);
+            arrow1.rotateY(lr);
+            arrow1.translateZ(len);
 
-			if (keyboard.pressed("up")) {
-				ud += 0.0001;
-			}
-
-			if (keyboard.pressed("down")) {
-				ud -= 0.0001;
-			}
-
-			if (keyboard.pressed("right")) {
-				lr += 0.0001;
-			}
-
-			if (keyboard.pressed("left")) {
-				lr -= 0.0001;
-			}
-			//set camTarget
-			var pitchVec = new THREE.Vector3(0, 1, 0);
-			var yawVec   = new THREE.Vector3(camTarget.x, 0, camTarget.z);
-			yawVec.applyAxisAngle(pitchVec, Math.PI/2);
-			yawVec.normalize();
-			camTarget.applyAxisAngle(yawVec, ud);
-			camTarget.applyAxisAngle(pitchVec, lr);
-			camTarget.normalize();
-
-            targTmp.copy(camTarget);
-            if (len < 0) {
-                targTmp.negate();
-            }
-            targTmp.setLength(Math.abs(len));
-
-            camera.position.add(targTmp);
-            camTmp.addVectors(camera.position, camTarget);
-            camera.lookAt(camTmp);
             render();
         }
 
