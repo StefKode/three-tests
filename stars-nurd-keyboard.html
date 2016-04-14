@@ -11,12 +11,17 @@
         
         canvas {
             width: 100%;
-            height: 100%
+            height: 90%;
+            display: block;
+        }
+
+        .gauge {
+            color: red;
         }
     </style>
 </head>
 
-<body>
+<body  bgcolor="#000011">
     <script src="../js/three.min.js"></script>
     <script src="THREEx.KeyboardState.js"></script>
     <script src="GamepadControls.js"></script>
@@ -27,10 +32,10 @@
         //
         var particles, geometry, material, parameters, i, h, color, size;
         var renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setSize(window.innerWidth, window.innerHeight-30);
         document.body.appendChild(renderer.domElement);
 
-        var camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 9000);
+        var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 9000);
 		//camera.position.z = -2000;
         var scene = new THREE.Scene();
 		var keyboard = new THREEx.KeyboardState();
@@ -40,20 +45,6 @@
         sprite = new THREE.TextureLoader().load("star.png");
 
         var arrow1 = new THREE.Group();
-        var origin1 = new THREE.Vector3( 0, 0, 0 );
-        var dir1X = new THREE.Vector3(   1, 0, 0 );
-        var dir1Y = new THREE.Vector3(   0, 1, 0 );
-        var dir1Z = new THREE.Vector3(   0, 0, 1 );
-        dir1Z.add(origin1);
-        dir1Y.add(origin1);
-        dir1X.add(origin1);
-        var length1 = 200;
-        var arrowHelper1X = new THREE.ArrowHelper( dir1X, origin1, length1, 0xff0000 );
-        var arrowHelper1Y = new THREE.ArrowHelper( dir1Y, origin1, length1, 0x00ff00 );
-        var arrowHelper1Z = new THREE.ArrowHelper( dir1Z, origin1, length1, 0x0000ff );
-        arrow1.add(arrowHelper1X);
-        arrow1.add(arrowHelper1Y);
-        arrow1.add(arrowHelper1Z);
         scene.add(arrow1);
 
         //this is the edge length of the cube forming space
@@ -212,29 +203,29 @@
         function animate() {
             requestAnimationFrame(animate);
 
-//			if (keyboard.pressed("pageup")) {
-//            	len += 0.01;
-//			}
-//
-//			if (keyboard.pressed("pagedown")) {
-//            	len -= 0.01;
-//			}
-//
-//			if (keyboard.pressed("up")) {
-//				ud += 0.0001;
-//			}
-//
-//			if (keyboard.pressed("down")) {
-//				ud -= 0.0001;
-//			}
-//
-//			if (keyboard.pressed("right")) {
-//				lr += 0.0001;
-//			}
-//
-//			if (keyboard.pressed("left")) {
-//				lr -= 0.0001;
-//			}
+			if (keyboard.pressed("pageup")) {
+            	len += 0.01;
+			}
+
+			if (keyboard.pressed("pagedown")) {
+            	len -= 0.01;
+			}
+
+			if (keyboard.pressed("up")) {
+				ud += 0.0001;
+			}
+
+			if (keyboard.pressed("down")) {
+				ud -= 0.0001;
+			}
+
+			if (keyboard.pressed("right")) {
+				lr -= 0.0001;
+			}
+
+			if (keyboard.pressed("left")) {
+				lr += 0.0001;
+			}
             len +=  0.0005 * controls.jmove;
             lr  += -0.00008 * controls.jroll;
             ud  +=  0.00008 * controls.jpitch;
@@ -251,5 +242,6 @@
         }
         animate();
     </script>
+    <p class="gauge">Thruster: 0</p>
 </body>
 </html>
