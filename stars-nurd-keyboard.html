@@ -43,27 +43,26 @@
         var arrow1 = new THREE.Group();
         scene.add(arrow1);
 
-	// create a canvas element
-	var canvas1 = document.createElement('canvas');
-	var context1 = canvas1.getContext('2d');
-	context1.font = "60px Arial";
-	context1.fillStyle = "rgba(255,0,0,0.95)";
-    context1.fillText('Hello, world!', 0, 50);
-    
-	// canvas contents will be used for a texture
-	var texture1 = new THREE.Texture(canvas1) 
-	texture1.needsUpdate = true;
-      
-    var material1 = new THREE.MeshBasicMaterial( {map: texture1, side:THREE.DoubleSide } );
-    material1.transparent = true;
+		//-------------------------------------------------------------------------------
+		// create a canvas element
+		var canvas1 = document.createElement('canvas');
+		canvas1.width = 400;
+		canvas1.height = 100;
+		var context1 = canvas1.getContext('2d');
+		context1.font = "30px Arial";
+		context1.fillStyle = "rgba(255,0,0,0.95)";
 
-    var mesh1 = new THREE.Mesh(
-        new THREE.PlaneGeometry(25, 15),
-        material1
-      );
-	mesh1.position.set(-30,-30,-50);
-	arrow1.add( mesh1 );
+		// canvas contents will be used for a texture
+		var texture1 = new THREE.Texture(canvas1) 
+		texture1.needsUpdate = true;
 
+		var material1 = new THREE.MeshBasicMaterial( {map: texture1, side:THREE.DoubleSide } );
+		material1.transparent = true;
+
+		var mesh1 = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 0.5), material1);
+		mesh1.position.set(-3,-2,-5);
+		arrow1.add( mesh1 );
+		//-------------------------------------------------------------------------------
 
         //this is the edge length of the cube forming space
         var maxSpaceSize = 2000;
@@ -196,25 +195,28 @@
 
         var center1 = { 'x': 0.0, 'y': 0.0, 'z': 0.0 };
         var center2 = { 'x': 0.0, 'y': 0.0, 'z': -2000.0 };
+        var center3 = { 'x': 500.0, 'y': 2000.0, 'z': -1000.0 };
+        var center4 = { 'x': -1000.0, 'y': 1000.0, 'z': -1000.0 };
 
         setupProbEnv();
-        makeParticles(10000, 100, 1, center1, 1.0);
+        makeParticles(5000, 100, 1, center1, 1.0);
         makeParticles(1000, 100, 1, center2, 0.4);
+        makeParticles(500, 100, 1, center3, 0.4);
+        makeParticles(1000, 100, 1, center4, 0.4);
 
         // this is the surrounding space (uses urd)
         makeParticles(1000, 100, 0, center1, 1.0);
-
 
         //###############################################################################
   		var len = 0;
 		var lr  = 0;
 		var ud  = 0;
+		var txUpdate = 0;
 
         arrow1.add(camera);
         arrow1.translateZ(2000);
 
         function animate() {
-            requestAnimationFrame(animate);
 
 			if (keyboard.pressed("pageup")) {
             	len += 0.01;
@@ -239,15 +241,24 @@
 			if (keyboard.pressed("left")) {
 				lr += 0.0001;
 			}
-            len +=  0.005 * controls.jmove;
+            len +=  0.005   * controls.jmove;
             lr  += -0.00008 * controls.jroll;
             ud  +=  0.00008 * controls.jpitch;
+
+			if (txUpdate == 70) {
+					context1.clearRect(0, 0, canvas1.width, canvas1.height);
+					context1.fillText("Thrust:" + -controls.jmove.toFixed(3) + " Speed:" + -len.toFixed(3), 0, canvas1.height-20);
+					texture1.needsUpdate = true;
+					txUpdate = 0;
+			}
+			txUpdate++;
 
             arrow1.rotateX(ud);
             arrow1.rotateY(lr);
             arrow1.translateZ(len);
 
             render();
+            requestAnimationFrame(animate);
         }
 
         function render() {
