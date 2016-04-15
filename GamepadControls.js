@@ -79,9 +79,9 @@ THREE.GamepadControls = function (object) {
 		if( rawGamepads && rawGamepads[ 0 ] ) {
 			var g = rawGamepads[ 0 ];
 			
-            this.jpitch = this.filter(g.axes[1]);
-            this.jroll  = this.filter(g.axes[0]);
-            this.jmove  = this.filter(10.0 * g.axes[2]);
+            this.jpitch = this.filter(g.axes[1]-1.0);
+            this.jroll  = this.filter(g.axes[0]-1.0);
+            this.jmove  = this.filter(g.axes[2]-1.0);
 
 			//this.lon += this.jroll;
 			//this.lat += this.jpitch;
